@@ -116,7 +116,10 @@ def main() -> int:
 
         attendee = vCalAddress('MAILTO:' + attendee_email)
         attendee.params['cn'] = vText(nonempty_input('Please enter a name: '))
+        attendee.params['CUTYPE'] = vText('INDIVIDUAL')
         attendee.params['ROLE'] = vText('REQ-PARTICIPANT')
+        attendee.params['PARTSTAT'] = vText('NEEDS-ACTION')
+        attendee.params['RSVP'] = vText('TRUE')
         event.add('attendee', attendee, encode=0)
 
     # Highest priority assigned to this event
