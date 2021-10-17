@@ -1,4 +1,14 @@
 organizer_name: Baochun Li
 organizer_email: bli@ece.toronto.edu
 timezone: America/Toronto
+
+# An alarm is set for a number of minutes before the event
 alarm_before_event: 10
+
+# Are we requesting a response from the attendees?
+response_requested: true
+
+# Mail server (example server is for FastMail)
+mail_server: mail.messagingengine.com
+username: user@example.com
+password: example_password

@@ -1,22 +1,24 @@
 """
-A simple but handy utility to generate an iCalendar event
-file, which can be emailed out to attendees of the event by
-the organizer.
+A simple but handy utility to generate an iCalendar event file, which can be emailed out to
+attendees of the event by the organizer.
 
-The name and email address of the organizer, the default
-timezone, as well as the number of minutes before the event
-when a default alarm will be displayed, can be read from a
-configuration file in YAML format. The default location for
-this configuration file is `ical.yml` in the same directory.
+The name and email address of the organizer, the default timezone, as well as the number of
+minutes before the event when a default alarm will be displayed, can be read from a
+configuration file in YAML format. The default location for this configuration file is
+`ical.yml` in the same directory.
 """
 import os
+import smtplib
 import sys
 import uuid
 from datetime import datetime, timedelta
-import yaml
+from email.headerregistry import Address
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart, MIMEBase
 
 import pytz
-from icalendar import Calendar, Event, Alarm, vCalAddress, vDatetime, vText
+import yaml
+from icalendar import Alarm, Calendar, Event, vCalAddress, vDatetime, vText
 
 
 def get_date(prompt: str, timezone: str) -> datetime:
@@ -64,8 +66,49 @@ def nonempty_input(prompt: str,
             return contents
 
 
+def send_email(cal, summary, config, attendee_names, attendee_emails: list) -> None:
+    """ Sending an email to each attendee, with 'invite.ics' as attachment. """
+    # Build the email message and attach the event to it
+    msg = MIMEMultipart()
+    msg['Subject'] = summary
+    msg['From'] = f"{config['organizer_name']} <{config['organizer_email']}>"
+    attendees = []
+    for name, email in zip(attendee_names, attendee_emails):
+        print(name)
+        print(email)
+        attendees.append(f'{name} <{email}>')
+
+    msg['To'] = ', '.join(attendees)
+
+    msg_alternative = MIMEMultipart('alternative')
+    msg.attach(msg_alternative)
+    msg_alternative.attach(MIMEText(nonempty_input(
+        'Please enter the body of your email message: ', multi_line=True) + '\n'))
+
+    # Needed for Outlook to interpret the email correctly
+    msg["Content-class"] = "urn:content-classes:calendarmessage"
+
+    filename = 'invite.ics'
+    part = MIMEBase('text', "calendar", _charset='base64',
+                    method="REQUEST", name=filename)
+    part.set_payload(cal.to_ical())
+    part.add_header('Content-Description', filename)
+    part.add_header("Content-class", "urn:content-classes:calendarmessage")
+    part.add_header("Filename", filename)
+    part.add_header("Path", filename)
+    msg.attach(part)
+
+    # Sends the email out
+    with smtplib.SMTP_SSL(config['mail_server'], port=465) as mailer:
+        mailer.login(config['username'], config['password'])
+        mailer.send_message(msg)
+        print('Email message sent with the event invitation attached.')
+
+
 def main() -> int:
     """ Generates an iCalendar event based on user input at the console. """
+
+    print('Welcome to the iCalendar event generator.')
 
     # Reading from a configuration file
     if 'config_file' in os.environ:
@@ -77,18 +120,24 @@ def main() -> int:
         with open(config_filename, 'r', encoding='utf8') as config_file:
             config = yaml.load(config_file, Loader=yaml.SafeLoader)
 
+        print('Current configuration: ')
         print(config)
     else:
         print('Unable to locate the configuration file.')
         return 0
 
     cal = Calendar()
-    cal['method'] = vText('REQUEST')
+    cal['prodid'] = '-//iCal-event-generator//github.com/baochunli//'
+    cal['version'] = '2.0'
+
+    # Are we requesting a response from the attendees?
+    if config['response_requested']:
+        cal['method'] = vText('REQUEST')
+    else:
+        cal['method'] = vText('PUBLISH')
 
     event = Event()
     event['uid'] = uuid.uuid1()
-
-    print('Welcome to the iCalendar event generator.')
 
     # Summary of the event
     event['summary'] = vText(nonempty_input(
@@ -110,6 +159,9 @@ def main() -> int:
 
     # Attendees of the event (optional)
     print("Now enter a list of attendees.")
+    attendee_names = []
+    attendee_emails = []
+
     while True:
         attendee_email = nonempty_input(
             "Please enter an email address (enter return to end): ", confirm_on_empty=False)
@@ -117,15 +169,25 @@ def main() -> int:
             break
 
         attendee = vCalAddress('MAILTO:' + attendee_email)
-        attendee.params['cn'] = vText(nonempty_input('Please enter a name: '))
+        attendee_emails.append(attendee_email)
+        attendee_name = nonempty_input('Please enter a name: ')
+        attendee.params['cn'] = vText(attendee_name)
+        attendee_names.append(attendee_name)
+        print('Attendees so far:')
+        print(attendee_names)
+        print(attendee_emails)
+
         attendee.params['CUTYPE'] = vText('INDIVIDUAL')
         attendee.params['ROLE'] = vText('REQ-PARTICIPANT')
-        attendee.params['PARTSTAT'] = vText('NEEDS-ACTION')
-        attendee.params['RSVP'] = vText('TRUE')
-        event.add('attendee', attendee, encode=0)
 
-    # Highest priority assigned to this event
-    event.add('priority', 1)
+        if config['response_requested']:
+            attendee.params['PARTSTAT'] = vText('NEEDS-ACTION')
+            attendee.params['RSVP'] = vText('TRUE')
+        else:
+            attendee.params['PARTSTAT'] = vText('ACCEPTED')
+            attendee.params['RSVP'] = vText('FALSE')
+
+        event.add('attendee', attendee, encode=0)
 
     # Recurring event
     binary_response = input('Is the event recurring? (y/N): ')
@@ -151,12 +213,28 @@ def main() -> int:
     alarm.add('description', desc)
     event.add_component(alarm)
 
+    # Highest priority assigned to this event
+    event.add('priority', 1)
+
+    # Adds a creation timestamp
+    timezone = pytz.timezone(config['timezone'])
+    event.add('created', timezone.localize(datetime.now()))
+
     cal.add_component(event)
 
-    with open(os.path.join('.', 'event.ics'), 'wb') as ics_file:
+    with open(os.path.join('.', 'invite.ics'), 'wb') as ics_file:
         ics_file.write(cal.to_ical())
 
     print("This event has been saved to the file 'event.ics'.")
+
+    if attendee_emails:
+        binary_response = input(
+            'Would you like to send emails to the attendees? (y/N): ')
+        if binary_response == 'y':
+            # Sending an email to the attendees
+            send_email(cal, event['summary'], config,
+                       attendee_names, attendee_emails)
+
     return 0
 
 
