@@ -1,12 +1,13 @@
-""" A simple but handy utility to generate an iCalendar event file,
-    which can be emailed out to attendees of the event by the organizer.
+"""
+A simple but handy utility to generate an iCalendar event
+file, which can be emailed out to attendees of the event by
+the organizer.
 
-    The name and email address of the organizer and the default timezone
-    can be read from a configuration file in YAML format.
-
-    The event can include the names and email addresses of attendees,
-    and includes a default alarm at a configurable number of minutes
-    before the event.
+The name and email address of the organizer, the default
+timezone, as well as the number of minutes before the event
+when a default alarm will be displayed, can be read from a
+configuration file in YAML format. The default location for
+this configuration file is `ical.yml` in the same directory.
 """
 import os
 import sys
