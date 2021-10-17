@@ -76,6 +76,7 @@ def send_email(cal: Calendar,
     msg = MIMEMultipart()
     msg['Subject'] = summary
     msg['From'] = f"{config['organizer_name']} <{config['organizer_email']}>"
+    msg['Cc'] = msg['From']
     attendees = []
     for name, email in zip(attendee_names, attendee_emails):
         attendees.append(f'{name} <{email}>')
