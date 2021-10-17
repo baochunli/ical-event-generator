@@ -65,7 +65,11 @@ def nonempty_input(prompt: str,
             return contents
 
 
-def send_email(cal, summary, config, attendee_names, attendee_emails: list) -> None:
+def send_email(cal: Calendar,
+               summary: str,
+               config: dict,
+               attendee_names: list,
+               attendee_emails: list) -> None:
     """ Sending an email to each attendee, with 'invite.ics' as attachment. """
     # Build the email message and attach the event to it
     msg = MIMEMultipart()
