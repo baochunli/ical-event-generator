@@ -235,7 +235,7 @@ def main() -> int:
     with open(os.path.join('.', 'invite.ics'), 'wb') as ics_file:
         ics_file.write(cal.to_ical())
 
-    print("This event has been saved to the file 'event.ics'.")
+    print("This event has been saved to the file 'invite.ics'.")
 
     if attendee_emails:
         binary_response = input(
