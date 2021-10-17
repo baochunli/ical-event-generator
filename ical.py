@@ -13,7 +13,8 @@ import sys
 import uuid
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart, MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
 
 import pytz
 import yaml
