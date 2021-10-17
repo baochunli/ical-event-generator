@@ -2,7 +2,7 @@
 
 This simple command-line utility is designed to generate an iCalendar event, and sending it out as an email to the attendees.
 
-## Overview
+## Why Do We Need This?
 
 It is written out of my frustration that very few applications allowed me to very quickly generate a simple and clean iCalendar event file (`.ics`), which I can attach and email out to the attendees.
 
