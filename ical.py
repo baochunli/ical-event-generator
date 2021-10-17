@@ -12,7 +12,6 @@ import smtplib
 import sys
 import uuid
 from datetime import datetime, timedelta
-from email.headerregistry import Address
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart, MIMEBase
 
@@ -74,11 +73,10 @@ def send_email(cal, summary, config, attendee_names, attendee_emails: list) -> N
     msg['From'] = f"{config['organizer_name']} <{config['organizer_email']}>"
     attendees = []
     for name, email in zip(attendee_names, attendee_emails):
-        print(name)
-        print(email)
         attendees.append(f'{name} <{email}>')
 
     msg['To'] = ', '.join(attendees)
+    print('Sending an email to: ' + msg['To'])
 
     msg_alternative = MIMEMultipart('alternative')
     msg.attach(msg_alternative)
@@ -89,9 +87,15 @@ def send_email(cal, summary, config, attendee_names, attendee_emails: list) -> N
     msg["Content-class"] = "urn:content-classes:calendarmessage"
 
     filename = 'invite.ics'
-    part = MIMEBase('text', "calendar", _charset='base64',
-                    method="REQUEST", name=filename)
+
+    if config['response_requested']:
+        part = MIMEBase('text', "calendar", _charset='base64',
+                        method="REQUEST", name=filename)
+    else:
+        part = MIMEBase('text', "calendar", _charset='base64',
+                        method="PUBLISH", name=filename)
     part.set_payload(cal.to_ical())
+
     part.add_header('Content-Description', filename)
     part.add_header("Content-class", "urn:content-classes:calendarmessage")
     part.add_header("Filename", filename)
