@@ -83,6 +83,8 @@ def main() -> int:
         return 0
 
     cal = Calendar()
+    cal['method'] = vText('REQUEST')
+
     event = Event()
     event['uid'] = uuid.uuid1()
 
