@@ -205,12 +205,13 @@ def main() -> int:
         freq_terms = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']
         frequency = int(input(
             'Frequency (daily = 0, weekly = 1, monthly = 2, yearly = 3): '))
-        assert frequency >= 0 and frequency <= 3
+        assert 0 <= frequency <= 3
         until = get_date('end of recurring event', config['timezone'])
 
         event.add('rrule', {'FREQ': freq_terms[frequency], 'UNTIL': until})
 
-    description = input('Please enter a note (optional): ')
+    description = nonempty_input('Please enter a note (optional): ', multi_line=True)
+
     if description != '':
         event.add('description', description)
 
