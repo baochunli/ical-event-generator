@@ -28,6 +28,12 @@ To install the dependencies in your Python environment, run:
 pip install -r requirements.txt --upgrade
 ```
 
+To upgrade Python packages in an existing Python environment, run:
+
+```shell
+python upgrade_packages.py
+```
+
 To run the utility:
 
 ```shell
