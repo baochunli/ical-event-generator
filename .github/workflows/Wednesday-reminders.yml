@@ -1,0 +1,60 @@
+# This workflow will send an email to multiple recipients
+
+name: Send Wednesday reminders
+
+on:
+  schedule:
+    - cron: "0 20 * * 3"
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    branches: [main]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "email"
+  email:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+      - name: Send email to multiple recipients
+        uses: dawidd6/action-send-mail@v3
+        with:
+          # Required mail server address:
+          server_address: mail.messagingengine.com
+          # Required mail server port:
+          server_port: 465
+          # Optional (recommended): mail server username:
+          username: ${{secrets.MAIL_USERNAME}}
+          # Optional (recommended) mail server password:
+          password: ${{secrets.MAIL_PASSWORD}}
+          # Required mail subject:
+          subject: Reminder — a brief update before our meeting tomorrow
+          # Required recipients' addresses:
+          to: ${{secrets.WEDNESDAY_EMAILS}}
+          # Required sender full name (address can be skipped):
+          from: Baochun Li <bli@ece.toronto.edu>
+          # Optional whether this connection use TLS (default is true if server_port is 465)
+          secure: true
+          # Optional plain body:
+          body: file://reminder-email.txt
+          # Optional HTML body read from file:
+          # html_body: file://reminder_email.html
+          # Optional carbon copy recipients:
+          # cc: kyloren@example.com,leia@example.com
+          # Optional blind carbon copy recipients:
+          # bcc: bli@ece.toronto.edu
+          # Optional recipient of the email response:
+          # reply_to: bli@ece.toronto.edu
+          # Optional Message ID this message is replying to:
+          # in_reply_to: <random-luke@example.com>
+          # Optional unsigned/invalid certificates allowance:
+          # ignore_cert: true
+          # Optional converting Markdown to HTML (set content_type to text/html too):
+          # convert_markdown: true
+          # Optional attachments:
+          # attachments: attachments.zip,git.diff,./dist/static/*.js
+          # Optional priority: 'high', 'normal' (default) or 'low'
+          priority: low
