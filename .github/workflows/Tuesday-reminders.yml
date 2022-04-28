@@ -45,7 +45,7 @@ jobs:
           # Optional carbon copy recipients:
           # cc: kyloren@example.com,leia@example.com
           # Optional blind carbon copy recipients:
-          bcc: bli@ece.toronto.edu
+          # bcc: bli@ece.toronto.edu
           # Optional recipient of the email response:
           # reply_to: bli@ece.toronto.edu
           # Optional Message ID this message is replying to:
