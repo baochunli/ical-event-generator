@@ -4,7 +4,7 @@ name: Send Wednesday reminders
 
 on:
   schedule:
-    - cron: "0 20 * * 3"
+    - cron: "0 12 * * 3"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     branches: [main]
