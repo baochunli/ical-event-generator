@@ -31,7 +31,7 @@ jobs:
           # Optional (recommended) mail server password:
           password: ${{secrets.MAIL_PASSWORD}}
           # Required mail subject:
-          subject: Reminder — a brief update before our meeting tomorrow
+          subject: Reminder — weekly updates
           # Required recipients' addresses:
           to: ${{secrets.THURSDAY_EMAILS}}
           # Required sender full name (address can be skipped):
