@@ -110,19 +110,18 @@ def send_email(cal: Calendar,
     msg.attach(part)
 
     # Sends the email out
-    if config['protocol'] == 'TLS':
-        smtp_port = 587
-    else:
-        smtp_port = 465    
-
     smtp_server = config['mail_server']
 
-    mailer = smtplib.SMTP(smtp_server, smtp_port)
-
     if config['protocol'] == 'TLS':
+        smtp_port = 587
+        mailer = smtplib.SMTP(smtp_server, smtp_port)
         mailer.ehlo()
         mailer.starttls()
         mailer.ehlo()
+    else:
+        assert config['protocol'] == 'SSL'
+        smtp_port = 465
+        mailer = smtplib.SMTP_SSL(smtp_server, smtp_port)
 
     mailer.login(config['username'], config['password'])
     mailer.send_message(msg)
