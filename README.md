@@ -18,6 +18,8 @@ The name and email address of the organizer, the default timezone, as well as th
 
 Once the iCalendar event file has been generated, the utility will send it out as an attachment automatically to all the attendees if needed. The subject of the outgoing email message is the same as the summary (title) of the event, and the content of the email message can be composed on-the-fly when prompted. In order to send an email using an existing mail server, the domain name, username, and password of the mail server need to be added to the configuration file (`ical.yml`).
 
+Mailing lists can be used by entering the name of the `.csv` file (without the `.csv` suffix). For example, if we wish to use a file called `baochun-group.csv`, we would enter `baochun-group` when prompted for the name of the mailing list. The file will contain a spreadsheet in comma-delimited format, with the first column containing the names of the attendees, and the second containing their email addresses.
+
 *Note:* If you are trying to use certain mail servers (such as `gmail.com`) to send emails from Python, you may need to generate an app-specific password. For `gmail.com`, you may also need to [allow less secure apps](https://support.google.com/accounts/answer/6010255) in your account.
 
 ## Installing and Running the Utility
