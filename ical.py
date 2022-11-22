@@ -7,14 +7,15 @@ minutes before the event when a default alarm will be displayed, can be read fro
 configuration file in YAML format. The default location for this configuration file is
 `ical.yml` in the same directory.
 """
+import csv
 import os
 import smtplib
 import sys
 import uuid
 from datetime import datetime, timedelta
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import pytz
 import yaml
@@ -167,37 +168,72 @@ def main() -> int:
     organizer.params['role'] = vText('CHAIR')
     event['organizer'] = organizer
 
-    # Attendees of the event (optional)
-    print("Now enter a list of attendees.")
-    attendee_names = []
-    attendee_emails = []
+    # Prompting to enter an email group (optional)
+    mailinglist_name = nonempty_input(
+            "Enter a name for a mailing list in .csv format (enter return if N/A): ", confirm_on_empty=False)
+    if mailinglist_name == '':
+        # Prompt to enter attendees of the event individually (optional)
+        print("Now enter a list of attendees (optional).")
+        attendee_names = []
+        attendee_emails = []
 
-    while True:
-        attendee_email = nonempty_input(
-            "Please enter an email address (enter return to end): ", confirm_on_empty=False)
-        if attendee_email == '':
-            break
+        while True:
+            attendee_email = nonempty_input(
+                "Please enter an email address (enter return to end): ", confirm_on_empty=False)
+            if attendee_email == '':
+                break
 
-        attendee = vCalAddress('MAILTO:' + attendee_email)
-        attendee_emails.append(attendee_email)
-        attendee_name = nonempty_input('Please enter a name: ')
-        attendee.params['cn'] = vText(attendee_name)
-        attendee_names.append(attendee_name)
-        print('Attendees so far:')
+            attendee = vCalAddress('MAILTO:' + attendee_email)
+            attendee_emails.append(attendee_email)
+            attendee_name = nonempty_input('Please enter a name: ')
+            attendee.params['cn'] = vText(attendee_name)
+            attendee_names.append(attendee_name)
+            print('Attendees so far:')
+            print(attendee_names)
+            print(attendee_emails)
+
+            attendee.params['CUTYPE'] = vText('INDIVIDUAL')
+            attendee.params['ROLE'] = vText('REQ-PARTICIPANT')
+
+            if config['response_requested']:
+                attendee.params['PARTSTAT'] = vText('NEEDS-ACTION')
+                attendee.params['RSVP'] = vText('TRUE')
+            else:
+                attendee.params['PARTSTAT'] = vText('ACCEPTED')
+                attendee.params['RSVP'] = vText('FALSE')
+
+            event.add('attendee', attendee, encode=0)
+    else:
+        attendee_names = []
+        attendee_emails = []
+        
+        with open(mailinglist_name + '.csv', 'r') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                attendee_name = str(row[0])
+                attendee_email = str(row[1])
+
+                attendee = vCalAddress('MAILTO:' + attendee_email)
+                attendee_emails.append(attendee_email)
+
+                attendee.params['cn'] = vText(attendee_name)
+                attendee_names.append(attendee_name)
+
+                attendee.params['CUTYPE'] = vText('INDIVIDUAL')
+                attendee.params['ROLE'] = vText('REQ-PARTICIPANT')
+
+                if config['response_requested']:
+                    attendee.params['PARTSTAT'] = vText('NEEDS-ACTION')
+                    attendee.params['RSVP'] = vText('TRUE')
+                else:
+                    attendee.params['PARTSTAT'] = vText('ACCEPTED')
+                    attendee.params['RSVP'] = vText('FALSE')
+
+                event.add('attendee', attendee, encode=0)
+
+        print('Attendees from the mailing list:')
         print(attendee_names)
         print(attendee_emails)
-
-        attendee.params['CUTYPE'] = vText('INDIVIDUAL')
-        attendee.params['ROLE'] = vText('REQ-PARTICIPANT')
-
-        if config['response_requested']:
-            attendee.params['PARTSTAT'] = vText('NEEDS-ACTION')
-            attendee.params['RSVP'] = vText('TRUE')
-        else:
-            attendee.params['PARTSTAT'] = vText('ACCEPTED')
-            attendee.params['RSVP'] = vText('FALSE')
-
-        event.add('attendee', attendee, encode=0)
 
     # Recurring event
     binary_response = input('Is the event recurring? (y/N): ')
