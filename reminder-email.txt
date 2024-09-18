@@ -1,4 +1,12 @@
-Just a quick reminder for your weekly update today. It would be great if you can send it by 5 p.m., but please send it no later than 10 p.m. Thank you.
+Just a quick reminder for your weekly update today. 
+
+It would be best if you can send it to me by 6:00 p.m. according to the following internal website:
+
+[Group Policy on Weekly Updates](https://github.com/iQua/internal-website/wiki/Weekly-updates)
+
+In your weekly updates, please describe **the work you have done in the preceding week** since the last time you sent your update, as well as **your plans for the upcoming week**.
+
+Thank you!
 
 Best regards,
 Baochun
