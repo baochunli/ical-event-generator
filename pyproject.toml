@@ -1,0 +1,11 @@
+[project]
+name = "ical-event-generator"
+version = "0.1.0"
+description = "Generating Calendar Events"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "icalendar",
+    "pyyaml",
+    "pytz"
+]
