@@ -22,6 +22,11 @@ import yaml
 from icalendar import Alarm, Calendar, Event, vCalAddress, vDatetime, vText
 
 
+BUILD_WORKING_DIRECTORY = os.getenv('BUILD_WORKING_DIRECTORY')
+INVITE_FILE = os.path.join(
+    '.' if BUILD_WORKING_DIRECTORY is None else BUILD_WORKING_DIRECTORY, 'invite.ics')
+
+
 def get_date(prompt: str, timezone: str) -> datetime:
     """ Obtains a date from user input. """
     date_str = input(f'Enter date of {prompt} (yy-mm-dd hh:mm): ')
@@ -97,10 +102,10 @@ def send_email(cal: Calendar,
 
     if config['response_requested']:
         part = MIMEBase('text', "calendar", _charset='base64',
-                        method="REQUEST", name=filename)
+                        method="REQUEST", name=INVITE_FILE)
     else:
         part = MIMEBase('text', "calendar", _charset='base64',
-                        method="PUBLISH", name=filename)
+                        method="PUBLISH", name=INVITE_FILE)
     part.set_payload(cal.to_ical())
 
     part.add_header('Content-Description', filename)
@@ -281,7 +286,7 @@ def main() -> int:
 
     cal.add_component(event)
 
-    with open(os.path.join('.', 'invite.ics'), 'wb') as ics_file:
+    with open(INVITE_FILE, 'wb') as ics_file:
         ics_file.write(cal.to_ical())
 
     print("This event has been saved to the file 'invite.ics'.")
