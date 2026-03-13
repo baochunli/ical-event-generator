@@ -18,9 +18,9 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Send email to multiple recipients
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@v14
         with:
           # Required mail server address:
           server_address: smtp.fastmail.com
