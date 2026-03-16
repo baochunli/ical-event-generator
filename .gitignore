@@ -132,3 +132,9 @@ dmypy.json
 invite.ics
 /*.csv
 /.vscode
+
+# Bazel
+/bazel-*
+
+# Vim
+.*.swp
