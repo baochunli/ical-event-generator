@@ -1,0 +1,18 @@
+load("@pip//:requirements.bzl", "requirement")
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+
+compile_pip_requirements(
+  name = "requirements",
+  src = "requirements.txt",
+  requirements_txt = "requirements_lock.txt",
+)
+
+py_binary(
+    name = "ical",
+    srcs = ["ical.py"],
+    data = ["ical.yml"],
+    deps = [
+        requirement("pyyaml"),
+        requirement("icalendar"),
+    ],
+)

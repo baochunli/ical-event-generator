@@ -42,4 +42,9 @@ To run the utility:
 python ical.py
 ```
 
+Or skip all that and just run it with [Bazel](https://bazel.build/install):
+```shell
+bazel run //:ical
+```
+
 Enjoy!
